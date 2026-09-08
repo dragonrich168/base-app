@@ -30,9 +30,7 @@ export const env = parsed.data;
 
 /** Comma-separated list of allowed CORS origins, or ['*'] for all. */
 export const corsOrigins: string[] =
-  env.CORS_ORIGINS === '*'
-    ? ['*']
-    : env.CORS_ORIGINS.split(',').map((origin) => origin.trim());
+  env.CORS_ORIGINS === '*' ? ['*'] : env.CORS_ORIGINS.split(',').map((origin) => origin.trim());
 
 export const isProduction = env.NODE_ENV === 'production';
 export const isTest = env.NODE_ENV === 'test';

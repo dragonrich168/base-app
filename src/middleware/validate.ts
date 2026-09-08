@@ -27,9 +27,7 @@ export function validate(options: ValidateOptions) {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        next(
-          ApiError.badRequest('Validation failed', error.issues.map(formatIssue)),
-        );
+        next(ApiError.badRequest('Validation failed', error.issues.map(formatIssue)));
         return;
       }
       next(error);
