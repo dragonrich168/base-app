@@ -4,12 +4,13 @@ import { itemService } from '../services/item.service';
 import { validate } from '../middleware/validate';
 import { CreateItemSchema, UpdateItemSchema } from '../types/item';
 import { IdParamSchema } from '../types/params';
+import { ListQuerySchema } from '../types/list-query';
 
 export function itemRoutes(): Router {
   const router = Router();
   const controller = createItemController({ service: itemService });
 
-  router.get('/', controller.list.bind(controller));
+  router.get('/', validate({ query: ListQuerySchema }), controller.list.bind(controller));
   router.post('/', validate({ body: CreateItemSchema }), controller.create.bind(controller));
 
   const idRoutes = Router({ mergeParams: true });

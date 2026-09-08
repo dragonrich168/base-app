@@ -1,8 +1,14 @@
 import { InMemoryStore } from '../data/InMemoryStore';
 import { ApiError } from '../errors/ApiError';
 import type { Item, CreateItemInput, UpdateItemInput } from '../types/item';
+import { paginate, type Page } from '../utils/pagination';
 
 interface ItemRecord extends Item {}
+
+export interface ItemListQuery {
+  page: number;
+  pageSize: number;
+}
 
 /**
  * Business logic for items. The controller is deliberately thin and delegates
@@ -11,8 +17,9 @@ interface ItemRecord extends Item {}
 export class ItemService {
   private readonly store = new InMemoryStore<ItemRecord>();
 
-  list(): Item[] {
-    return this.store.findAll();
+  list(query: ItemListQuery): Page<Item> {
+    const items = this.store.findAll();
+    return paginate(items, query.page, query.pageSize);
   }
 
   get(id: string): Item {

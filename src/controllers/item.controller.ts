@@ -1,7 +1,8 @@
 import type { Request, Response } from 'express';
 import type { itemService } from '../services/item.service';
-import { validatedBody } from '../types/http';
+import { validatedBody, validatedQuery } from '../types/http';
 import type { CreateItemInput, UpdateItemInput } from '../types/item';
+import type { ListQuery } from '../types/list-query';
 
 interface ItemControllerDeps {
   service: typeof itemService;
@@ -9,8 +10,9 @@ interface ItemControllerDeps {
 
 export function createItemController({ service }: ItemControllerDeps) {
   return {
-    list(_req: Request, res: Response): void {
-      res.status(200).json({ items: service.list() });
+    list(req: Request, res: Response): void {
+      const query = validatedQuery<ListQuery>(req);
+      res.status(200).json(service.list(query));
     },
 
     get(req: Request, res: Response): void {
