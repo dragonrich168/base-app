@@ -65,10 +65,15 @@ describe('Items REST API', () => {
       expect(res.body.item.name).toBe('find me');
     });
 
-    it('returns 404 for a missing item', async () => {
-      const res = await request(app).get('/api/v1/items/does-not-exist');
+    it('returns 404 for a valid but missing item id', async () => {
+      const res = await request(app).get('/api/v1/items/00000000-0000-4000-8000-000000000000');
       expect(res.status).toBe(404);
       expect(res.body.error.statusCode).toBe(404);
+    });
+
+    it('returns 400 for a malformed id', async () => {
+      const res = await request(app).get('/api/v1/items/not-a-uuid');
+      expect(res.status).toBe(400);
     });
   });
 
@@ -83,8 +88,10 @@ describe('Items REST API', () => {
       expect(res.body.item.name).toBe('after');
     });
 
-    it('returns 404 when updating a missing item', async () => {
-      const res = await request(app).put('/api/v1/items/nope').send({ name: 'x' });
+    it('returns 404 when updating a valid but missing item', async () => {
+      const res = await request(app)
+        .put('/api/v1/items/00000000-0000-4000-8000-000000000000')
+        .send({ name: 'x' });
       expect(res.status).toBe(404);
     });
   });
@@ -98,8 +105,8 @@ describe('Items REST API', () => {
       expect(res.status).toBe(204);
     });
 
-    it('returns 404 for a missing item', async () => {
-      const res = await request(app).delete('/api/v1/items/nope');
+    it('returns 404 for a valid but missing item', async () => {
+      const res = await request(app).delete('/api/v1/items/00000000-0000-4000-8000-000000000000');
       expect(res.status).toBe(404);
     });
   });
