@@ -20,15 +20,27 @@ describe('ItemService', () => {
   });
 
   describe('list', () => {
-    it('returns an empty list initially', () => {
-      expect(service.list()).toEqual([]);
+    it('returns an empty page initially', () => {
+      const page = service.list({ page: 1, pageSize: 20 });
+      expect(page.data).toEqual([]);
+      expect(page.total).toBe(0);
     });
 
-    it('returns all created items', () => {
+    it('returns all created items within page defaults', () => {
       service.create({ name: 'alpha' });
       service.create({ name: 'beta' });
 
-      expect(service.list()).toHaveLength(2);
+      const page = service.list({ page: 1, pageSize: 20 });
+      expect(page.data).toHaveLength(2);
+      expect(page.total).toBe(2);
+    });
+
+    it('paginates results', () => {
+      for (let i = 0; i < 5; i++) service.create({ name: `item-${i}` });
+
+      const page = service.list({ page: 3, pageSize: 2 });
+      expect(page.data).toHaveLength(1);
+      expect(page.totalPages).toBe(3);
     });
   });
 
@@ -66,7 +78,7 @@ describe('ItemService', () => {
       const created = service.create({ name: 'alpha' });
       service.remove(created.id);
 
-      expect(service.list()).toHaveLength(0);
+      expect(service.list({ page: 1, pageSize: 20 }).total).toBe(0);
     });
 
     it('throws for a missing item', () => {

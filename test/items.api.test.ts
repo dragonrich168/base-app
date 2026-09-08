@@ -8,7 +8,8 @@ const app = createApp();
 describe('Items REST API', () => {
   beforeEach(() => {
     // Each test starts from an empty store.
-    itemService.list().forEach((item) => itemService.remove(item.id));
+    const all = itemService.list({ page: 1, pageSize: 100 }).data;
+    all.forEach((item) => itemService.remove(item.id));
   });
 
   describe('POST /api/v1/items', () => {
@@ -45,13 +46,38 @@ describe('Items REST API', () => {
   });
 
   describe('GET /api/v1/items', () => {
-    it('lists items', async () => {
+    it('lists items with pagination metadata', async () => {
       await request(app).post('/api/v1/items').send({ name: 'one' });
       await request(app).post('/api/v1/items').send({ name: 'two' });
 
       const res = await request(app).get('/api/v1/items');
       expect(res.status).toBe(200);
-      expect(res.body.items).toHaveLength(2);
+      expect(res.body.data).toHaveLength(2);
+      expect(res.body.total).toBe(2);
+      expect(res.body.page).toBe(1);
+      expect(res.body.pageSize).toBe(20);
+      expect(res.body.totalPages).toBe(1);
+    });
+
+    it('pages results and respects page/pageSize', async () => {
+      for (let i = 0; i < 5; i++) {
+        await request(app)
+          .post('/api/v1/items')
+          .send({ name: `item-${i}` });
+      }
+
+      const pageOne = await request(app).get('/api/v1/items?page=1&pageSize=2');
+      expect(pageOne.body.data).toHaveLength(2);
+      expect(pageOne.body.total).toBe(5);
+      expect(pageOne.body.totalPages).toBe(3);
+
+      const pageThree = await request(app).get('/api/v1/items?page=3&pageSize=2');
+      expect(pageThree.body.data).toHaveLength(1);
+    });
+
+    it('rejects a non-numeric page size', async () => {
+      const res = await request(app).get('/api/v1/items?pageSize=abc');
+      expect(res.status).toBe(400);
     });
   });
 
