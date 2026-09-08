@@ -5,6 +5,7 @@ import { corsOrigins } from './config/env';
 import { apiRoutes } from './routes';
 import { requestId } from './middleware/requestId';
 import { requestLogger } from './middleware/requestLogger';
+import { rateLimiter } from './middleware/rateLimit';
 import { notFound } from './middleware/notFound';
 import { errorHandler } from './middleware/errorHandler';
 
@@ -23,6 +24,7 @@ export function createApp(): Express {
     }),
   );
   app.use(express.json({ limit: '100kb' }));
+  app.use(rateLimiter);
   app.use(requestId);
   app.use(requestLogger);
 
