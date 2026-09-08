@@ -1,0 +1,222 @@
+openapi: 3.0.3
+info:
+  title: base-app API
+  version: 0.1.0
+  description: REST API starter kit exposing health and a CRUD items resource.
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development server
+paths:
+  /health:
+    get:
+      summary: Liveness probe
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+  /items:
+    get:
+      summary: List items
+      operationId: listItems
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: A page of items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    post:
+      summary: Create an item
+      operationId: createItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateItem'
+      responses:
+        '201':
+          description: Item created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/Item'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /items/{id}:
+    parameters:
+      - $ref: '#/components/parameters/ItemId'
+    get:
+      summary: Get an item
+      operationId: getItem
+      responses:
+        '200':
+          description: The requested item
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/Item'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      summary: Update an item
+      operationId: updateItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateItem'
+      responses:
+        '200':
+          description: The updated item
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/Item'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Delete an item
+      operationId: deleteItem
+      responses:
+        '204':
+          description: Item deleted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  parameters:
+    ItemId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Item identifier (UUIDv4)
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      description: Page number, 1-based
+    PageSize:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      description: Number of results per page
+  responses:
+    BadRequest:
+      description: Invalid input
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Item:
+      type: object
+      required: [id, name, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 120
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CreateItem:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+    UpdateItem:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+    ItemPage:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+    Health:
+      type: object
+      required: [status, uptime, timestamp]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        uptime:
+          type: number
+        timestamp:
+          type: string
+          format: date-time
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+            statusCode:
+              type: integer
+            details:
+              description: Optional structured details (e.g. validation issues)
