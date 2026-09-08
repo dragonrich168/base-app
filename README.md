@@ -17,6 +17,8 @@ so you can focus on shipping your own domain logic instead of wiring up boilerpl
 - 🧪 Unit/integration tests with [Vitest](https://vitest.dev) + Supertest
 - 🔍 Linting & formatting via ESLint + Prettier
 - 🚀 Zero-config local dev with hot reload (`tsx watch`)
+- 🐳 Multi-stage Docker build + `docker-compose` with healthcheck
+- 🧾 [OpenAPI 3](docs/openapi.yaml) spec + endpoint examples
 - 🤖 GitHub Actions CI on every push / PR
 
 ## Quick start
@@ -46,6 +48,24 @@ Then open <http://localhost:3000/api/v1/health> — you should see a healthy JSO
 | `npm run lint`       | Lint the source                          |
 | `npm run format`     | Auto-format source with Prettier         |
 | `npm run check`      | typecheck + lint + test in one go        |
+
+## Run with Docker
+
+```bash
+# build and start (production mode)
+docker compose up --build
+
+# verify the container health
+docker compose ps
+curl http://localhost:3000/api/v1/health
+```
+
+## Documentation
+
+- [Architecture](docs/architecture.md)
+- [OpenAPI spec](docs/openapi.yaml)
+- [API examples](docs/api-examples.md)
+- [Contributing](CONTRIBUTING.md)
 
 ## Project layout
 
